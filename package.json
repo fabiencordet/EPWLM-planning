@@ -15,7 +15,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:import:stage2026": "tsx scripts/import_stage_ete_2026.ts"
   },
-  "devDependencies": {
+  "dependencies": {
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
