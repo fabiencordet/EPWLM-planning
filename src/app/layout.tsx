@@ -15,12 +15,6 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Planning EPWLM",
   description: "SaaS de gestion des plannings du club de patinage EPWLM",
-  manifest: "/manifest.webmanifest",
-  icons: {
-    icon: "/app-icon.svg",
-    apple: "/app-icon.svg",
-    shortcut: "/app-icon.svg",
-  },
 };
 
 export default function RootLayout({
@@ -33,6 +27,12 @@ export default function RootLayout({
       lang="fr"
       className={`${sora.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1"
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

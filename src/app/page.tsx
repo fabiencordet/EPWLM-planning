@@ -85,18 +85,9 @@ export default async function Home() {
                 aria-label="Se connecter"
                 title="Se connecter"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  className="h-5 w-5"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="8" r="4" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 20c1.6-3.2 4.5-5 8-5s6.4 1.8 8 5" />
-                </svg>
+                <span className="material-symbols-rounded text-[20px] leading-none" aria-hidden="true">
+                  login
+                </span>
               </Link>
             )}
           </div>
