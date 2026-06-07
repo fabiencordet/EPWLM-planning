@@ -680,6 +680,11 @@ export default function WeeklyCalendar({
             center: "title",
             right: isMobile ? "timeGridDay" : "timeGridWeek,timeGridDay",
           }}
+          titleFormat={
+            isMobile
+              ? { day: "2-digit", month: "2-digit", year: "2-digit" }
+              : { year: "numeric", month: "long", day: "numeric" }
+          }
           dayHeaderContent={(arg) => {
             const weekday = arg.date
               .toLocaleDateString("fr-FR", { weekday: "short" })
