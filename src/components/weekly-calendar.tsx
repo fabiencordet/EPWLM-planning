@@ -638,6 +638,37 @@ export default function WeeklyCalendar({
         </div>
       ) : null}
 
+      <div className="mb-2 flex items-center justify-end gap-1 md:hidden">
+        <button
+          type="button"
+          className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+            preferredView === "timeGridWeek"
+              ? "border-cyan-700 bg-cyan-700 text-white"
+              : "border-slate-300 bg-white text-slate-700"
+          }`}
+          onClick={() => {
+            setPreferredView("timeGridWeek");
+            calendarRef.current?.getApi().changeView("timeGridWeek");
+          }}
+        >
+          Sem
+        </button>
+        <button
+          type="button"
+          className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+            preferredView === "timeGridDay"
+              ? "border-cyan-700 bg-cyan-700 text-white"
+              : "border-slate-300 bg-white text-slate-700"
+          }`}
+          onClick={() => {
+            setPreferredView("timeGridDay");
+            calendarRef.current?.getApi().changeView("timeGridDay");
+          }}
+        >
+          Jour
+        </button>
+      </div>
+
       <div className="fc-compact-planning">
         <FullCalendar
           ref={calendarRef}
@@ -680,7 +711,7 @@ export default function WeeklyCalendar({
           headerToolbar={{
             left: "prev,next today",
             center: "title",
-            right: "timeGridWeek,timeGridDay",
+            right: isMobile ? "" : "timeGridWeek,timeGridDay",
           }}
           buttonText={{
             today: "today",
