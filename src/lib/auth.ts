@@ -19,7 +19,6 @@ function dbRoleToAppRole(role: Role): AppRole {
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
-  trustHost: true,
   pages: {
     signIn: "/login",
   },
