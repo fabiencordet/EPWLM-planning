@@ -275,8 +275,8 @@ export default function WeeklyCalendar({
     const latest = Math.max(...trainings.map((t) => toMinutes(t.endTime)));
 
     const min =
-      isMobile && preferredView === "timeGridDay"
-        ? Math.max(0, earliest - 10)
+      preferredView === "timeGridDay"
+        ? Math.max(0, earliest - 60)
         : earliest < DEFAULT_START_MINUTES
           ? Math.max(0, earliest - 10)
           : DEFAULT_START_MINUTES;
@@ -286,7 +286,7 @@ export default function WeeklyCalendar({
       slotMinTime: toHhmmss(min),
       slotMaxTime: toHhmmss(max),
     };
-  }, [isMobile, preferredView, trainings]);
+  }, [preferredView, trainings]);
 
   const events = useMemo(
     () =>
@@ -647,6 +647,8 @@ export default function WeeklyCalendar({
           expandRows
           slotMinTime={slotMinTime}
           slotMaxTime={slotMaxTime}
+          scrollTime={slotMinTime}
+          scrollTimeReset={false}
           slotDuration="00:30:00"
           slotLabelInterval="00:30:00"
           slotLabelContent={(arg) => {
