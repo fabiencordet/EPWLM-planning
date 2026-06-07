@@ -235,6 +235,20 @@ export default function WeeklyCalendar({
 
   useEffect(() => {
     try {
+      const stored = localStorage.getItem(PREF_KEY);
+      if (!stored) return;
+
+      const parsed = JSON.parse(stored) as { sectionIds?: string[] };
+      if (Array.isArray(parsed.sectionIds)) {
+        setSelectedSectionIds(parsed.sectionIds.filter((id) => typeof id === "string"));
+      }
+    } catch {
+      // localStorage might be blocked or malformed
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(
         PREF_KEY,
         JSON.stringify({ sectionIds: activeSectionIds, coachIds: activeCoachIds, view: preferredView }),
@@ -260,14 +274,19 @@ export default function WeeklyCalendar({
     const earliest = Math.min(...trainings.map((t) => toMinutes(t.startTime)));
     const latest = Math.max(...trainings.map((t) => toMinutes(t.endTime)));
 
-    const min = earliest < DEFAULT_START_MINUTES ? Math.max(0, earliest - 10) : DEFAULT_START_MINUTES;
+    const min =
+      isMobile && preferredView === "timeGridDay"
+        ? Math.max(0, earliest)
+        : earliest < DEFAULT_START_MINUTES
+          ? Math.max(0, earliest - 10)
+          : DEFAULT_START_MINUTES;
     const max = latest > DEFAULT_END_MINUTES ? Math.min(24 * 60, latest + 15) : Math.max(latest + 15, 19 * 60);
 
     return {
       slotMinTime: toHhmmss(min),
       slotMaxTime: toHhmmss(max),
     };
-  }, [trainings]);
+  }, [isMobile, preferredView, trainings]);
 
   const events = useMemo(
     () =>
@@ -457,19 +476,7 @@ export default function WeeklyCalendar({
       ) : null}
 
       <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-2 md:hidden">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between rounded-md px-1 py-1 text-left text-sm font-semibold text-slate-700"
-          aria-expanded={isSectionFiltersOpen}
-          aria-controls="mobile-section-filters"
-          onClick={() => setIsSectionFiltersOpen((open) => !open)}
-        >
-          <span>Filtres sections {activeSectionIds.length > 0 ? `(${activeSectionIds.length})` : "(toutes)"}</span>
-          <span className="text-xs text-slate-500">{isSectionFiltersOpen ? "Masquer" : "Afficher"}</span>
-        </button>
-
-        {isSectionFiltersOpen ? (
-          <div id="mobile-section-filters" className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
@@ -479,13 +486,38 @@ export default function WeeklyCalendar({
             }`}
             onClick={() => {
               setSelectedSectionIds([]);
-              setIsSectionFiltersOpen(false);
               if (!range) return;
               void refreshEvents(range.start, range.end, undefined, activeCoachIds);
             }}
           >
             Toutes sections
           </button>
+
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            aria-expanded={isSectionFiltersOpen}
+            aria-controls="mobile-section-filters"
+            onClick={() => setIsSectionFiltersOpen((open) => !open)}
+          >
+            Filtrer
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className={`h-4 w-4 transition-transform ${isSectionFiltersOpen ? "rotate-180" : "rotate-0"}`}
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+
+        {isSectionFiltersOpen ? (
+          <div id="mobile-section-filters" className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3">
+            <p className="w-full text-xs font-semibold uppercase tracking-wide text-slate-500">Disciplines</p>
 
           {sections.map((section) => {
             const color = sectionColorByName.get(section.name) ?? SECTION_COLORS[0];
@@ -506,7 +538,6 @@ export default function WeeklyCalendar({
                     const next = prev.includes(section.id)
                       ? prev.filter((id) => id !== section.id)
                       : [...prev, section.id];
-                    setIsSectionFiltersOpen(false);
                     if (range) {
                       void refreshEvents(range.start, range.end, next, activeCoachIds);
                     }
