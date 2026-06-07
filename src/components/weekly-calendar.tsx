@@ -222,11 +222,6 @@ export default function WeeklyCalendar({
 
     const applyMode = (mobile: boolean) => {
       setIsMobile(mobile);
-      setPreferredView((prev) => {
-        if (mobile && prev === "timeGridWeek") return "timeGridDay";
-        if (!mobile && prev === "timeGridDay") return "timeGridWeek";
-        return prev;
-      });
     };
 
     applyMode(media.matches);
@@ -242,9 +237,12 @@ export default function WeeklyCalendar({
       const stored = localStorage.getItem(PREF_KEY);
       if (!stored) return;
 
-      const parsed = JSON.parse(stored) as { sectionIds?: string[] };
+      const parsed = JSON.parse(stored) as { sectionIds?: string[]; view?: CalendarView };
       if (Array.isArray(parsed.sectionIds)) {
         setSelectedSectionIds(parsed.sectionIds.filter((id) => typeof id === "string"));
+      }
+      if (parsed.view === "timeGridWeek" || parsed.view === "timeGridDay") {
+        setPreferredView(parsed.view);
       }
     } catch {
       // localStorage might be blocked or malformed
@@ -466,7 +464,7 @@ export default function WeeklyCalendar({
   }
 
   return (
-    <section className="mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm md:p-4">
+    <section className="mt-2 rounded-lg border border-slate-200 bg-white p-1 shadow-sm md:mt-4 md:rounded-xl md:p-4">
       {canManage ? (
         <div className="mb-3 flex justify-end">
           <button
@@ -682,7 +680,12 @@ export default function WeeklyCalendar({
           headerToolbar={{
             left: "prev,next today",
             center: "title",
-            right: isMobile ? "timeGridDay" : "timeGridWeek,timeGridDay",
+            right: "timeGridWeek,timeGridDay",
+          }}
+          buttonText={{
+            today: "today",
+            week: isMobile ? "sem" : "week",
+            day: isMobile ? "jour" : "day",
           }}
           dayHeaderContent={(arg) => {
             const weekday = arg.date

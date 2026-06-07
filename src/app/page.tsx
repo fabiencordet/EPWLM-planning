@@ -66,9 +66,9 @@ export default async function Home() {
   }));
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#ecfeff_0%,_#f8fafc_45%,_#ffffff_100%)] px-3 py-6 text-slate-900 md:px-6">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#ecfeff_0%,_#f8fafc_45%,_#ffffff_100%)] px-1 py-3 text-slate-900 md:px-6 md:py-6">
       <section className="mx-auto w-full max-w-none">
-        <header className="rounded-2xl border border-cyan-100 bg-white/90 p-6 shadow-sm backdrop-blur-sm">
+        <header className="rounded-xl border border-cyan-100 bg-white/90 p-3 shadow-sm backdrop-blur-sm md:rounded-2xl md:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">Planning Club</p>
@@ -93,7 +93,7 @@ export default async function Home() {
           </div>
         </header>
 
-        <section className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="mt-3 grid gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-sm md:mt-6 md:gap-4 md:rounded-2xl md:p-4">
           <WeeklyCalendar
             initialSections={sections}
             initialTrainings={serializedTrainings}
