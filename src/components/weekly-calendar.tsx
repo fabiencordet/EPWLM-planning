@@ -276,7 +276,7 @@ export default function WeeklyCalendar({
 
     const min =
       isMobile && preferredView === "timeGridDay"
-        ? Math.max(0, earliest)
+        ? Math.max(0, earliest - 10)
         : earliest < DEFAULT_START_MINUTES
           ? Math.max(0, earliest - 10)
           : DEFAULT_START_MINUTES;
