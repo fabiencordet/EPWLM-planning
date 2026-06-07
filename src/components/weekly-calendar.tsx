@@ -116,6 +116,10 @@ function normalize(value: string) {
     .toLowerCase();
 }
 
+function toFirstName(fullName: string) {
+  return fullName.trim().split(/\s+/)[0] ?? fullName;
+}
+
 function findCoachByNameKeyword(users: UserOption[], keyword: string) {
   const normalized = normalize(keyword);
   return users.find((u) => normalize(u.name).includes(normalized));
@@ -629,7 +633,7 @@ export default function WeeklyCalendar({
                   });
                 }}
               >
-                {isCurrentUser ? "Moi" : user.name}
+                {isCurrentUser ? "Moi" : isMobile ? toFirstName(user.name) : user.name}
               </button>
             );
           })}
@@ -680,11 +684,6 @@ export default function WeeklyCalendar({
             center: "title",
             right: isMobile ? "timeGridDay" : "timeGridWeek,timeGridDay",
           }}
-          titleFormat={
-            isMobile
-              ? { day: "2-digit", month: "2-digit", year: "2-digit" }
-              : { year: "numeric", month: "long", day: "numeric" }
-          }
           dayHeaderContent={(arg) => {
             const weekday = arg.date
               .toLocaleDateString("fr-FR", { weekday: "short" })
