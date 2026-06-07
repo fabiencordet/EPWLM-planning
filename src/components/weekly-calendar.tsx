@@ -455,7 +455,61 @@ export default function WeeklyCalendar({
         </div>
       ) : null}
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <details className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-2 md:hidden">
+        <summary className="cursor-pointer list-none text-sm font-semibold text-slate-700">
+          Filtres sections {activeSectionIds.length > 0 ? `(${activeSectionIds.length})` : "(toutes)"}
+        </summary>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+              activeSectionIds.length === 0
+                ? "border-slate-900 bg-slate-900 text-white"
+                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+            onClick={() => {
+              setSelectedSectionIds([]);
+              if (!range) return;
+              void refreshEvents(range.start, range.end, undefined, activeCoachIds);
+            }}
+          >
+            Toutes sections
+          </button>
+
+          {sections.map((section) => {
+            const color = sectionColorByName.get(section.name) ?? SECTION_COLORS[0];
+            const active = activeSectionIds.includes(section.id);
+
+            return (
+              <button
+                key={section.id}
+                type="button"
+                className="rounded-full border px-3 py-1.5 text-sm font-medium transition"
+                style={{
+                  borderColor: color.border,
+                  backgroundColor: active ? color.chip : color.bg,
+                  color: active ? "#ffffff" : color.text,
+                }}
+                onClick={() => {
+                  setSelectedSectionIds((prev) => {
+                    const next = prev.includes(section.id)
+                      ? prev.filter((id) => id !== section.id)
+                      : [...prev, section.id];
+                    if (range) {
+                      void refreshEvents(range.start, range.end, next, activeCoachIds);
+                    }
+                    return next;
+                  });
+                }}
+              >
+                {section.name}
+              </button>
+            );
+          })}
+        </div>
+      </details>
+
+      <div className="mb-4 hidden flex-wrap items-center gap-2 md:flex">
         <button
           type="button"
           className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
