@@ -3,8 +3,36 @@ import { dispatchPendingEmailNotifications } from "@/lib/email";
 
 type NotificationEvent = "updated" | "deleted";
 
-function describeEvent(event: NotificationEvent) {
-  return event === "updated" ? "modifie" : "supprime";
+function formatTrainingDate(date: Date) {
+  const isoDate = date.toISOString().slice(0, 10);
+  const safeDate = new Date(`${isoDate}T12:00:00.000Z`);
+  return safeDate.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function buildNotificationMessage(training: {
+  date: Date;
+  startTime: string;
+  endTime: string;
+  location: string;
+  coach: { name: string };
+  notes: string | null;
+}, event: NotificationEvent) {
+  const dateLabel = formatTrainingDate(training.date);
+
+  if (event === "updated") {
+    const notes = training.notes?.trim();
+    const notesText = notes ? `\n\nNotes: ${notes}` : "";
+
+    return `Bonjour, l'entrainement du ${dateLabel} a ete modifie. L'entrainement aura lieu de ${training.startTime} a ${training.endTime} a ${training.location}. L'entraineur sera ${training.coach.name}.${notesText}`;
+  }
+
+  return `Bonjour, le creneau du ${dateLabel} de ${training.startTime} a ${training.endTime} a ${training.location} a ete supprime.`;
 }
 
 export async function createSectionMemberNotifications(
@@ -41,7 +69,7 @@ export async function createSectionMemberNotifications(
     },
   });
 
-  const message = `Le creneau ${training.title.toLowerCase()} du ${training.date.toISOString().slice(0, 10)} (${training.startTime}-${training.endTime}) a ete ${describeEvent(event)}. Section: ${training.section.name}.`;
+  const message = buildNotificationMessage(training, event);
 
   const payloads: Array<{
     trainingId: string;
