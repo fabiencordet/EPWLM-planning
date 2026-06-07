@@ -188,6 +188,7 @@ export default function WeeklyCalendar({
   const [range, setRange] = useState<{ start: string; end: string } | null>(null);
   const [preferredView, setPreferredView] = useState<CalendarView>("timeGridWeek");
   const [isMobile, setIsMobile] = useState(false);
+  const [isSectionFiltersOpen, setIsSectionFiltersOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<TrainingPopup | null>(null);
   const [editingTrainingId, setEditingTrainingId] = useState<string | null>(null);
   const [trainingForm, setTrainingForm] = useState<TrainingFormState>(() =>
@@ -455,11 +456,20 @@ export default function WeeklyCalendar({
         </div>
       ) : null}
 
-      <details className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-2 md:hidden">
-        <summary className="cursor-pointer list-none text-sm font-semibold text-slate-700">
-          Filtres sections {activeSectionIds.length > 0 ? `(${activeSectionIds.length})` : "(toutes)"}
-        </summary>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-2 md:hidden">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between rounded-md px-1 py-1 text-left text-sm font-semibold text-slate-700"
+          aria-expanded={isSectionFiltersOpen}
+          aria-controls="mobile-section-filters"
+          onClick={() => setIsSectionFiltersOpen((open) => !open)}
+        >
+          <span>Filtres sections {activeSectionIds.length > 0 ? `(${activeSectionIds.length})` : "(toutes)"}</span>
+          <span className="text-xs text-slate-500">{isSectionFiltersOpen ? "Masquer" : "Afficher"}</span>
+        </button>
+
+        {isSectionFiltersOpen ? (
+          <div id="mobile-section-filters" className="mt-3 flex flex-wrap items-center gap-2">
           <button
             type="button"
             className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
@@ -469,6 +479,7 @@ export default function WeeklyCalendar({
             }`}
             onClick={() => {
               setSelectedSectionIds([]);
+              setIsSectionFiltersOpen(false);
               if (!range) return;
               void refreshEvents(range.start, range.end, undefined, activeCoachIds);
             }}
@@ -495,6 +506,7 @@ export default function WeeklyCalendar({
                     const next = prev.includes(section.id)
                       ? prev.filter((id) => id !== section.id)
                       : [...prev, section.id];
+                    setIsSectionFiltersOpen(false);
                     if (range) {
                       void refreshEvents(range.start, range.end, next, activeCoachIds);
                     }
@@ -506,8 +518,9 @@ export default function WeeklyCalendar({
               </button>
             );
           })}
+            </div>
+          ) : null}
         </div>
-      </details>
 
       <div className="mb-4 hidden flex-wrap items-center gap-2 md:flex">
         <button
