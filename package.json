@@ -6,12 +6,27 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "db:up": "docker rm -f patin-postgres >/dev/null 2>&1 || true && docker run -d --name patin-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=patin -p 5432:5432 -v patin_pg_data:/var/lib/postgresql/data postgres:16",
+    "db:down": "docker rm -f patin-postgres",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:import:stage2026": "tsx scripts/import_stage_ete_2026.ts"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/react": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@prisma/client": "^6.19.0",
+    "bcryptjs": "^3.0.3",
     "next": "16.2.7",
+    "next-auth": "^4.24.14",
+    "prisma": "^6.19.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -21,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

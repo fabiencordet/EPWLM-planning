@@ -1,65 +1,125 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getServerSession } from "next-auth";
+import WeeklyCalendar from "@/components/weekly-calendar";
+import { authOptions } from "@/lib/auth";
+import { CLUB_NAME } from "@/lib/constants";
+import { prisma } from "@/lib/prisma";
+import { sortSections } from "@/lib/sections";
+import { toLabelTitle, toLabelType } from "@/lib/training-mapper";
+import SignOutButton from "@/components/sign-out-button";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+  const canManage = session?.user?.role === "coach" || session?.user?.role === "admin";
+  const isCoach = session?.user?.role === "coach";
+
+  const [rawSections, trainings, users] = await Promise.all([
+    prisma.section
+      .findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: { id: true, code: true, name: true },
+      })
+      .catch(() => []),
+    prisma.training
+      .findMany({
+        where: isCoach && session?.user?.id ? { coachId: session.user.id } : undefined,
+        include: {
+          section: { select: { name: true } },
+          coach: { select: { name: true } },
+        },
+        orderBy: [{ date: "asc" }, { startTime: "asc" }],
+        take: 100,
+      })
+      .catch(() => []),
+    canManage
+      ? prisma.user
+          .findMany({
+            where: { isActive: true },
+            orderBy: { name: "asc" },
+            select: { id: true, name: true, role: true },
+          })
+          .catch(() => [])
+      : Promise.resolve([]),
+  ]);
+
+  const sections = sortSections(rawSections);
+
+  const serializedTrainings = trainings.map((t) => ({
+    id: t.id,
+    sectionId: t.sectionId,
+    coachId: t.coachId,
+    section: t.section.name,
+    title: toLabelTitle(t.title),
+    titleKey: t.title,
+    type: toLabelType(t.type),
+    typeKey: t.type,
+    date: t.date.toISOString(),
+    startTime: t.startTime,
+    endTime: t.endTime,
+    location: t.location,
+    coach: t.coach.name,
+    notes: t.notes,
+    status: t.status,
+  }));
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#ecfeff_0%,_#f8fafc_45%,_#ffffff_100%)] px-3 py-6 text-slate-900 md:px-6">
+      <section className="mx-auto w-full max-w-none">
+        <header className="rounded-2xl border border-cyan-100 bg-white/90 p-6 shadow-sm backdrop-blur-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">Planning Club</p>
+              <h1 className="mt-2 text-3xl font-bold">{CLUB_NAME}</h1>
+            </div>
+            {session?.user ? (
+              <SignOutButton
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm ring-1 ring-slate-700 transition hover:bg-slate-800"
+              />
+            ) : (
+              <Link
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-cyan-700 text-white shadow-sm ring-1 ring-cyan-800 transition hover:bg-cyan-800"
+                href="/login"
+                aria-label="Se connecter"
+                title="Se connecter"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="h-5 w-5"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 20c1.6-3.2 4.5-5 8-5s6.4 1.8 8 5" />
+                </svg>
+              </Link>
+            )}
+          </div>
+        </header>
+
+        <section className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <WeeklyCalendar
+            initialSections={sections}
+            initialTrainings={serializedTrainings}
+            canManage={canManage}
+            currentUser={
+              session?.user?.id && session?.user?.role
+                ? { id: session.user.id, role: session.user.role }
+                : undefined
+            }
+            users={users.map((user) => ({
+              id: user.id,
+              name: user.name,
+              role: user.role,
+            }))}
+          />
+        </section>
+      </section>
+    </main>
   );
 }

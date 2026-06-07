@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Planning EPWLM
 
-## Getting Started
+Application SaaS de gestion des plannings pour un club de patinage associatif.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router + TypeScript
+- Tailwind CSS
+- Prisma + PostgreSQL
+- NextAuth (Credentials)
+
+## Fonctionnalités incluses (socle MVP)
+
+- Agenda public FullCalendar en vue hebdomadaire avec navigation semaine suivante/précédente
+- Filtre par section (toutes sections ou section ciblée)
+- Vue iframe en lecture seule (`/embed/schedule`)
+- Connexion entraîneur/admin (`/login`)
+- Espace admin protégé (`/admin`)
+
+API disponibles:
+	- `GET /api/trainings`
+	- `POST /api/trainings` (auth requis)
+	- `PATCH /api/trainings/:id` (auth requis)
+	- `DELETE /api/trainings/:id` (auth requis)
+	- `GET /api/weeks`
+	- `GET /api/sections`
+
+## Démarrage
+
+1. Copier l'environnement:
+
+```bash
+cp .env.example .env
+```
+
+2. Installer et générer Prisma:
+
+```bash
+npm install
+npm run prisma:generate
+```
+
+3. Démarrer PostgreSQL local (Docker):
+
+```bash
+npm run db:up
+```
+
+4. Initialiser la base:
+
+```bash
+npm run prisma:migrate -- --name init
+npm run db:seed
+```
+
+5. Lancer en local:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts utiles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev`
+- `npm run lint`
+- `npm run build`
+- `npm run prisma:generate`
+- `npm run prisma:migrate`
+- `npm run prisma:studio`
+- `npm run db:up`
+- `npm run db:down`
+- `npm run db:seed`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Note: le script `db:up` démarre un conteneur Docker `patin-postgres` sans dépendre de docker-compose.
 
-## Learn More
+## Modèle de données
 
-To learn more about Next.js, take a look at the following resources:
+Le schéma Prisma inclut les entités de base du domaine club:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `User` (coach/admin)
+- `Section`
+- `WeekProfile` (standard/stage)
+- `Training` et `TrainingTemplate`
+- `Skater`, `SkaterSection`, `TrainingAttendance`
+- `Notification`, `AuditLog`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Comptes de démonstration
 
-## Deploy on Vercel
+- Coach: `coach@epwlm.local` / `coach123`
+- Admin: `admin@epwlm.local` / `admin123`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tu peux surcharger ces valeurs via `.env`.

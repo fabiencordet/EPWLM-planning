@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  COACH
+  ADMIN
+}
+
+enum WeekType {
+  STANDARD
+  STAGE
+}
+
+enum TrainingTitle {
+  GLACE
+  PPG
+  SOL
+}
+
+enum TrainingType {
+  HEBDOMADAIRE
+  STAGE
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(COACH)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  coachedTrainings Training[] @relation("CoachTrainings")
+  updatedTrainings Training[] @relation("UpdatedByTrainings")
+  templates    TrainingTemplate[] @relation("TemplateCoach")
+  audits       AuditLog[] @relation("AuditActor")
+}
+
+model Section {
+  id                String             @id @default(cuid())
+  code              String             @unique
+  name              String
+  isActive          Boolean            @default(true)
+  templates         TrainingTemplate[]
+  trainings         Training[]
+  memberships       SkaterSection[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Skater {
+  id                 String            @id @default(cuid())
+  firstName          String
+  lastName           String
+  city               String?
+  parentEmail        String?
+  parentPhone        String?
+  isActive           Boolean           @default(true)
+  memberships        SkaterSection[]
+  attendanceRecords  TrainingAttendance[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model SkaterSection {
+  id         String   @id @default(cuid())
+  skaterId   String
+  sectionId  String
+  startsAt   DateTime
+  endsAt     DateTime?
+  skater     Skater   @relation(fields: [skaterId], references: [id], onDelete: Cascade)
+  section    Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId])
+  @@index([skaterId])
+}
+
+model WeekProfile {
+  id         String     @id @default(cuid())
+  isoYear    Int
+  isoWeek    Int
+  label      String?
+  type       WeekType   @default(STANDARD)
+  isPublished Boolean   @default(false)
+  trainings  Training[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([isoYear, isoWeek])
+}
+
+model TrainingTemplate {
+  id          String   @id @default(cuid())
+  sectionId   String
+  title       TrainingTitle
+  weekday     Int
+  startTime   String
+  endTime     String
+  location    String
+  coachId     String
+  isActive    Boolean  @default(true)
+  section     Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  coach       User     @relation("TemplateCoach", fields: [coachId], references: [id], onDelete: Restrict)
+}
+
+model Training {
+  id             String               @id @default(cuid())
+  weekProfileId  String
+  sectionId      String
+  title          TrainingTitle
+  type           TrainingType
+  date           DateTime
+  startTime      String
+  endTime        String
+  location       String
+  coachId        String
+  notes          String?
+  source         String               @default("manual")
+  status         String               @default("draft")
+  updatedById    String?
+  updatedAt      DateTime             @updatedAt
+  createdAt      DateTime             @default(now())
+  weekProfile    WeekProfile          @relation(fields: [weekProfileId], references: [id], onDelete: Cascade)
+  section        Section              @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  coach          User                 @relation("CoachTrainings", fields: [coachId], references: [id], onDelete: Restrict)
+  updatedBy      User?                @relation("UpdatedByTrainings", fields: [updatedById], references: [id], onDelete: SetNull)
+  attendance     TrainingAttendance[]
+  notifications  Notification[]
+
+  @@index([date])
+  @@index([sectionId])
+  @@unique([sectionId, date, startTime, endTime, location])
+}
+
+model TrainingAttendance {
+  id         String   @id @default(cuid())
+  trainingId String
+  skaterId   String
+  status     String   @default("planned")
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  skater     Skater   @relation(fields: [skaterId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingId, skaterId])
+}
+
+model Notification {
+  id            String   @id @default(cuid())
+  trainingId    String
+  channel       String
+  recipient     String
+  status        String   @default("pending")
+  payload       Json?
+  sentAt        DateTime?
+  createdAt     DateTime @default(now())
+  training      Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+
+  @@index([trainingId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  entity     String
+  entityId   String
+  action     String
+  beforeJson Json?
+  afterJson  Json?
+  createdAt  DateTime @default(now())
+  actor      User     @relation("AuditActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([entity, entityId])
+}
