@@ -214,6 +214,10 @@ a {
 }
 
 @media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
   .fc-compact-planning {
     --fc-timegrid-slot-min-height: 1.2rem;
   }
