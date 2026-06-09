@@ -72,7 +72,7 @@ export default async function Home() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">Planning Club</p>
-              <h1 className="mt-2 text-2xl font-bold md:text-3xl">{CLUB_NAME}</h1>
+              <h1 className="mt-2 text-xl font-bold md:text-3xl">{CLUB_NAME}</h1>
             </div>
             {session?.user ? (
               <SignOutButton

@@ -215,7 +215,7 @@ a {
 
 @media (max-width: 768px) {
   html {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .fc-compact-planning {
@@ -223,7 +223,7 @@ a {
   }
 
   .fc-compact-planning .fc {
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     border-radius: 0.45rem;
   }
 
@@ -243,12 +243,12 @@ a {
   }
 
   .fc-compact-planning .fc-toolbar-title {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
 
   .fc-compact-planning .fc-button {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.68rem;
+    padding: 0.15rem 0.35rem;
+    font-size: 0.62rem;
   }
 
   .fc-compact-planning .fc-timegrid-axis {
@@ -256,6 +256,6 @@ a {
   }
 
   .fc-gcal-date {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 }
