@@ -2,6 +2,15 @@
 
 Application SaaS de gestion des plannings pour un club de patinage associatif.
 
+## Documentation d'architecture
+
+Pour une explication detaillee de la structure du projet, des flux de donnees, des API et des environnements de base de donnees:
+
+- Voir `ARCHITECTURE_FONCTIONNEMENT.md`
+- Guide metier (coach/admin): `GUIDE_METIER_COACH_ADMIN.md`
+- Schema visuel simplifie: `FLUX_VISUEL_SIMPLIFIE.md`
+- Version presentation 5 minutes: `PRESENTATION_5_MINUTES.md`
+
 ## Stack
 
 - Next.js App Router + TypeScript
